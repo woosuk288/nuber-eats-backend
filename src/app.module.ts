@@ -6,6 +6,7 @@ import * as Joi from 'joi';
 import { join } from 'path';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { Restaurant } from './restaurants/entities/restaurants.entity';
 import { RestaurantsModule } from './restaurants/restaurants.module';
 
 @Module({
@@ -35,9 +36,9 @@ import { RestaurantsModule } from './restaurants/restaurants.module';
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
-      entities: [],
+      entities: [Restaurant],
       synchronize: true,
-      logging: true,
+      logging: process.env.NODE_ENV !== 'prod',
     }),
   ],
   controllers: [AppController],
