@@ -2,6 +2,30 @@
 
 The Backend of Nuber Eats Clone
 
+## Common
+
+- id
+- cratedAt
+- updatedAt
+
+## User Model:
+
+- email
+- password
+- role(client|owner|delivery)
+
+## User CRUD:
+
+- Create Account
+- Log In
+- See Profile
+- Edit Profile
+- Verify Email
+
+<!--
+
+  -->
+
 <p align="center">
   <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo_text.svg" width="320" alt="Nest Logo" /></a>
 </p>
