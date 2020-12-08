@@ -58,7 +58,23 @@ describe('UserService', () => {
   });
 
   describe('createAccount', () => {
-    it('should fail if user exist', () => {});
+    it('should fail if user exist', async () => {
+      userRepository.findOne.mockResolvedValue({
+        id: 1,
+        email: 'alsflaslalalal',
+      });
+      // findOne is going to return above ( faking ) value
+      const result = await service.createAcount({
+        email: '',
+        password: '',
+        role: 0,
+      });
+      console.log('result', result);
+      expect(result).toMatchObject({
+        ok: false,
+        error: 'There is a user with that email already',
+      });
+    });
   });
 
   it('should createAcount', () => {});
