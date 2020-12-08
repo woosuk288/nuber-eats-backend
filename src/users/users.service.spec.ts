@@ -7,11 +7,12 @@ import { User } from './entities/user.entity';
 import { Verification } from './entities/verification.entity';
 import { UserService } from './users.service';
 
-const mockRepository = {
+// createAccount시 user와 verification에서 같은 mock을 쓰고 있기에 함수형으로 해줌으로써 다르다른걸 익식 시켜줌
+const mockRepository = () => ({
   findOne: jest.fn(),
   save: jest.fn(),
-  creat: jest.fn(),
-};
+  create: jest.fn(),
+});
 
 const mockJwtService = {
   sign: jest.fn(),
@@ -26,7 +27,7 @@ type MockRepository<T = any> = Partial<Record<keyof Repository<T>, jest.Mock>>;
 
 describe('UserService', () => {
   let service: UserService;
-  let userRepository: MockRepository<User>;
+  let usersRepository: MockRepository<User>;
 
   beforeAll(async () => {
     const module = await Test.createTestingModule({
@@ -36,11 +37,11 @@ describe('UserService', () => {
         // fake
         {
           provide: getRepositoryToken(User),
-          useValue: mockRepository,
+          useValue: mockRepository(),
         },
         {
           provide: getRepositoryToken(Verification),
-          useValue: mockRepository,
+          useValue: mockRepository(),
         },
         {
           provide: JwtService,
@@ -54,30 +55,39 @@ describe('UserService', () => {
     }).compile();
 
     service = module.get<UserService>(UserService);
-    userRepository = module.get(getRepositoryToken(User));
+    usersRepository = module.get(getRepositoryToken(User));
   });
 
   describe('createAccount', () => {
+    const createAccountArgs = {
+      email: '',
+      password: '',
+      role: 0,
+    };
     it('should fail if user exist', async () => {
-      userRepository.findOne.mockResolvedValue({
+      usersRepository.findOne.mockResolvedValue({
         id: 1,
         email: 'alsflaslalalal',
       });
       // findOne is going to return above ( faking ) value
-      const result = await service.createAcount({
-        email: '',
-        password: '',
-        role: 0,
-      });
+      const result = await service.createAcount(createAccountArgs);
       console.log('result', result);
       expect(result).toMatchObject({
         ok: false,
         error: 'There is a user with that email already',
       });
     });
-  });
 
-  it('should createAcount', () => {});
+    it('should create a new user', async () => {
+      usersRepository.findOne.mockResolvedValue(undefined);
+      usersRepository.create.mockReturnValue(createAccountArgs);
+      await service.createAcount(createAccountArgs);
+      expect(usersRepository.create).toHaveBeenCalledTimes(1);
+      expect(usersRepository.create).toHaveBeenCalledWith(createAccountArgs);
+      expect(usersRepository.save).toHaveBeenCalledTimes(1);
+      expect(usersRepository.save).toHaveBeenCalledWith(createAccountArgs);
+    });
+  });
 
   it('should login', () => {
     expect(service).toBeDefined();
