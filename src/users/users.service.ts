@@ -66,7 +66,7 @@ export class UserService {
       if (!passwordCorrect) {
         return { ok: false, error: 'Wrong password' };
       }
-      console.log(user);
+      // console.log(user);
       // const token = jwt.sign({ id: user.id }, this.config.get('SECRET_KEY'));
       const token = this.jwtService.sign(user.id);
 
