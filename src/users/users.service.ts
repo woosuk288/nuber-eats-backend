@@ -103,14 +103,9 @@ export class UserService {
         user.password = password;
       }
       await this.users.save(user);
-      return {
-        ok: true,
-      };
+      return { ok: true };
     } catch (error) {
-      return {
-        ok: true,
-        error: 'Could not update profile.',
-      };
+      return { ok: true, error: 'Could not update profile.' };
     }
   }
 
