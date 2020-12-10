@@ -1,13 +1,13 @@
 import { Test } from '@nestjs/testing';
+import * as FormData from 'form-data';
+import got from 'got/dist/source';
 import { CONFIG_OPTIONS } from 'src/common/common.constants';
 import { MailService } from './mail.service';
 
-jest.mock('got', () => {});
-jest.mock('form-data', () => {
-  return {
-    append: jest.fn(),
-  };
-});
+const TEST_DOMAIN = 'test-domain';
+
+jest.mock('got'); // just want mock whole thing
+jest.mock('form-data');
 
 describe('MailService', () => {
   let service: MailService;
@@ -39,7 +39,7 @@ describe('MailService', () => {
         code: 'code',
       };
       jest.spyOn(service, 'sendEmail').mockImplementation(async () => {
-        console.log('I love you');
+        return true;
       });
       service.sendVerificationEmail(
         sendVerificationEmailArgs.email,
@@ -57,6 +57,27 @@ describe('MailService', () => {
     });
   });
 
-  it.todo('sendEmail');
-  it.todo('sendVerificationEmail');
+  describe('sendEmail', () => {
+    it('should send emai l', async () => {
+      /* { key: 'one', value: '1' } */
+      const ok = await service.sendEmail('', '', [{ key: 'one', value: '1' }]);
+      const formSpy = jest.spyOn(FormData.prototype, 'append'); // new FormData 사용 위해
+      expect(formSpy).toHaveBeenCalled();
+      expect(got.post).toHaveBeenCalledTimes(1);
+      // expect(got).toHaveBeenCalledWith(expect.any(String), expect.any(Object));
+      expect(got.post).toHaveBeenCalledWith(
+        `https://api.mailgun.net/v3/${TEST_DOMAIN}/messages`,
+        expect.any(Object),
+      );
+      expect(ok).toEqual(true);
+    });
+
+    it('should fail on error', async () => {
+      jest.spyOn(got, 'post').mockImplementation(() => {
+        throw new Error();
+      });
+      const ok = await service.sendEmail('', '', []);
+      expect(ok).toEqual(false);
+    });
+  });
 });

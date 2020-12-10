@@ -16,17 +16,16 @@ export class MailService {
     form.append('to', `woosuk288@gmail.com`);
     form.append('subject', subject);
     form.append('template', template);
-    form.append('v:code', 'hey mail gun~');
-    form.append('v:username', 'neo');
+    // form.append('v:code', 'hey mail gun~');
+    // form.append('v:username', 'neo');
     emailVars.forEach((eVar) =>
       form.append(`v:${eVar.key}`, `v:${eVar.value}`),
     );
 
     try {
-      const response = await got(
+      const response = await got.post(
         `https://api.mailgun.net/v3/${this.options.domain}/messages`,
         {
-          method: 'POST',
           headers: {
             Authorization: `Basic ${Buffer.from(
               `api:${this.options.apiKey}`,
@@ -36,9 +35,10 @@ export class MailService {
         },
       );
 
-      console.log(response.body);
+      return true;
     } catch (error) {
-      console.log(error);
+      // console.log(error);
+      return false;
     }
   }
 
