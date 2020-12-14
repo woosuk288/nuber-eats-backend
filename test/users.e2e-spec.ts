@@ -2,7 +2,9 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from './../src/app.module';
-import { getConnection } from 'typeorm';
+import { getConnection, Repository } from 'typeorm';
+import { User } from 'src/users/entities/user.entity';
+import { getRepositoryToken } from '@nestjs/typeorm';
 
 // --detectOpenHandles 실제로 이메일 안보낼 거니까 got module errror 처리 위해
 jest.mock('got', () => {
@@ -21,6 +23,7 @@ const testUser = {
 describe('UserModule (e2e)', () => {
   let app: INestApplication;
   let jwtToken: string;
+  let userReposity: Repository<User>;
 
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -28,6 +31,7 @@ describe('UserModule (e2e)', () => {
     }).compile();
 
     app = module.createNestApplication();
+    userReposity = module.get(getRepositoryToken(User));
     await app.init();
   });
 
@@ -140,7 +144,68 @@ describe('UserModule (e2e)', () => {
     });
   });
 
-  it.todo('userProfile');
+  describe('userProfile', () => {
+    let userId: number;
+    beforeAll(async () => {
+      const [user] = await userReposity.find();
+      userId = user.id;
+    });
+
+    it("should see a user's profile", async () => {
+      return request(app.getHttpServer())
+        .post(GRAPHQL_ENDPOINT)
+        .set('X-JWT', jwtToken) // 꼭 post 다음에 set 넣기
+        .send({
+          query: `
+        {
+          userProfile(userId:${userId}){
+            ok
+            error
+            user {
+              id
+            }
+          }
+        }`,
+        })
+        .expect(200)
+        .expect((res) => {
+          const {
+            ok,
+            error,
+            user: { id },
+          } = res.body.data.userProfile;
+          expect(ok).toBe(true);
+          expect(error).toBe(null);
+          expect(id).toBe(userId);
+        });
+    });
+
+    it('should not find a profile', async () => {
+      return request(app.getHttpServer())
+        .post(GRAPHQL_ENDPOINT)
+        .set('X-JWT', jwtToken)
+        .send({
+          query: `
+      {
+        userProfile(userId: 555){
+          ok
+          error
+          user {
+            id
+          }
+        }
+      }`,
+        })
+        .expect(200)
+        .expect((res) => {
+          const { ok, error, user } = res.body.data.userProfile;
+          expect(ok).toBe(false);
+          expect(error).toBe('User Not Found');
+          expect(user).toBe(null);
+        });
+    });
+  });
+
   it.todo('verifyEmail');
   it.todo('editProfile');
 });
