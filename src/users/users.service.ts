@@ -91,9 +91,11 @@ export class UserService {
   ): Promise<EditProfileOutput> {
     try {
       const user = await this.users.findOne(userId);
+      // TODO: email aleady taken
       if (email) {
         user.email = email;
         user.verified = false;
+        await this.verifications.delete({ user: { id: user.id } }); // 이게 되네, 신기하네
         const verification = await this.verifications.save(
           this.verifications.create({ user }),
         );
@@ -105,7 +107,8 @@ export class UserService {
       await this.users.save(user);
       return { ok: true };
     } catch (error) {
-      return { ok: true, error: 'Could not update profile.' };
+      // console.log(error);
+      return { ok: false, error: 'Could not update profile.' };
     }
   }
 
