@@ -27,6 +27,12 @@ export class UserResolver {
     return this.userService.login(loginInput);
   }
 
+  @Query(() => User)
+  @UseGuards(AuthGuard)
+  me(@AuthUser() authUser: User) {
+    return authUser;
+  }
+
   @Query(() => UserProfileOutput)
   @UseGuards(AuthGuard)
   userProfile(@Args() userProfileInput: UserProfileInput) {
