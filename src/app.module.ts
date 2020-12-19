@@ -61,6 +61,7 @@ import { Category } from './restaurants/entities/category.entity';
     JwtModule.forRoot({
       privateKey: process.env.PRIVATE_KEY,
     }),
+    RestaurantsModule,
     UsersModule,
     MailModule.forRoot({
       apiKey: process.env.MAILGUN_API_KEY,

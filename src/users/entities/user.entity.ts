@@ -8,7 +8,8 @@ import {
 import * as bcrypt from 'bcrypt';
 import { IsBoolean, IsEmail, IsEnum, IsString } from 'class-validator';
 import { CoreEntity } from 'src/common/entities/core.entity';
-import { BeforeInsert, BeforeUpdate, Column, Entity } from 'typeorm';
+import { Restaurant } from 'src/restaurants/entities/restaurants.entity';
+import { BeforeInsert, BeforeUpdate, Column, Entity, OneToMany } from 'typeorm';
 import { isString } from 'util';
 
 enum UserRole {
@@ -19,7 +20,8 @@ enum UserRole {
 
 registerEnumType(UserRole, { name: 'UserRole' });
 
-@InputType({ isAbstract: true })
+// #10.1 relations 처리 후 InpuyType과 ObjectType이 같은 이름을 사용하기 떄문에 에러가 나서 UserInputType 이름을 따로 지정.
+@InputType('UserInputType', { isAbstract: true })
 @ObjectType()
 @Entity()
 export class User extends CoreEntity {
@@ -42,6 +44,10 @@ export class User extends CoreEntity {
   @Field()
   @IsBoolean()
   verified: boolean;
+
+  @Field(() => [Restaurant])
+  @OneToMany(() => Restaurant, (restaurant) => restaurant.owner)
+  restaurants: Restaurant[];
 
   @BeforeInsert()
   @BeforeUpdate()
