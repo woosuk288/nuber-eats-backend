@@ -7,12 +7,14 @@ import { AllowedRoles } from './role.decorator';
 @Injectable()
 export class AuthGuard implements CanActivate {
   constructor(private readonly reflector: Reflector) {}
+  // canActivate must return boolean
   canActivate(context: ExecutionContext) {
     const roles = this.reflector.get<AllowedRoles>(
-      'roles',
+      'roles', // get from key of setMetadata
       context.getHandler(),
     );
     if (!roles) {
+      // public
       return true;
     }
     const gqlContext = GqlExecutionContext.create(context).getContext();
@@ -20,6 +22,7 @@ export class AuthGuard implements CanActivate {
     if (!user) {
       return false;
     }
+    // must have a user and any role
     if (roles.includes('Any')) {
       return true;
     }
