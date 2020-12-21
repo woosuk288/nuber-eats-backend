@@ -29,6 +29,17 @@ The Backend of Nuber Eats Clone
 - addres
 - coverImage
 
+- Edit Restaurant
+- Delete Restaurant
+
+- See Restaurants by Category (pagination)
+- See Restaurants (pagination)
+- See Restaurant
+
+- Create Dish
+- Edit Dish
+- Delete Dish
+
 <!--
 
   -->
