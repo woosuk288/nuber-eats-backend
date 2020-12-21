@@ -12,27 +12,15 @@ import {
   EditRestaurantInput,
   EditRestaurantOutput,
 } from './dtos/edit-restaurant.dto';
+import { CategoryRepository } from './repositories/category.repository';
 
 @Injectable()
 export class RestaurantService {
   constructor(
     @InjectRepository(Restaurant)
-    private readonly restaurant: Repository<Restaurant>,
-    @InjectRepository(Category)
-    private readonly categories: Repository<Category>,
+    private readonly restaurants: Repository<Restaurant>,
+    private readonly categories: CategoryRepository,
   ) {}
-
-  async getOrCreateCategory(name: string) {
-    const categoryName = name.trim().toLowerCase();
-    const categorySlug = categoryName.replace(/ /g, '-');
-    let category = await this.categories.findOne({ slug: categorySlug });
-    if (!category) {
-      category = await this.categories.save(
-        this.categories.create({ slug: categorySlug, name: categoryName }),
-      );
-    }
-    return category;
-  }
 
   async createRestaurant(
     owner: User,
@@ -40,13 +28,13 @@ export class RestaurantService {
   ): Promise<CreateRestaurantOutput> {
     try {
       console.log('newRestaurant : ', createRestaurantInput);
-      const newRestaurant = this.restaurant.create(createRestaurantInput);
+      const newRestaurant = this.restaurants.create(createRestaurantInput);
       newRestaurant.owner = owner;
-      const category = await this.getOrCreateCategory(
+      const category = await this.categories.getOrCreate(
         createRestaurantInput.categoryName,
       );
       newRestaurant.category = category;
-      await this.restaurant.save(newRestaurant);
+      await this.restaurants.save(newRestaurant);
       return { ok: true };
     } catch (error) {
       console.log(error);
@@ -56,11 +44,11 @@ export class RestaurantService {
 
   async editResetaurant(
     owner: User,
-    editResetaurantInput: EditRestaurantInput,
+    editRestaurantInput: EditRestaurantInput,
   ): Promise<EditRestaurantOutput> {
     try {
-      const restaurant = await this.restaurant.findOne(
-        editResetaurantInput.restaurantId,
+      const restaurant = await this.restaurants.findOne(
+        editRestaurantInput.restaurantId,
       );
 
       if (!restaurant) {
@@ -76,6 +64,19 @@ export class RestaurantService {
           error: "you can't edit a restaurant that you don't own.",
         };
       }
+      let category: Category = null;
+      if (editRestaurantInput.categoryName) {
+        category = await this.categories.getOrCreate(
+          editRestaurantInput.categoryName,
+        );
+      }
+      await this.restaurants.save([
+        {
+          id: editRestaurantInput.restaurantId,
+          ...editRestaurantInput,
+          ...(category && { category }), // category may be null
+        },
+      ]);
 
       return { ok: true };
     } catch (error) {
