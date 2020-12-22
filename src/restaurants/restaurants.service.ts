@@ -17,6 +17,7 @@ import {
   DeleteRestaurantInput,
   DeleteRestaurantOutput,
 } from './dtos/delete-restaurant.dto';
+import { AllCategoriesOutput } from './dtos/all-categories.dto';
 
 @Injectable()
 export class RestaurantService {
@@ -119,6 +120,16 @@ export class RestaurantService {
         ok: false,
         error: 'Could not delete a restaurant.',
       };
+    }
+  }
+
+  async allCategories(): Promise<AllCategoriesOutput> {
+    try {
+      const categories = await this.categories.find();
+
+      return { ok: true, categories };
+    } catch (error) {
+      return { ok: false, error: 'Cound not load categories' };
     }
   }
 }
