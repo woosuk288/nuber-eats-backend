@@ -132,4 +132,8 @@ export class RestaurantService {
       return { ok: false, error: 'Cound not load categories' };
     }
   }
+
+  countRestaurants(category: Category): Promise<number> {
+    return this.restaurants.count({ category });
+  }
 }
