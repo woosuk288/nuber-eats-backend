@@ -11,6 +11,7 @@ import { AuthUser } from 'src/auth/auth-user.decorator';
 import { Role } from 'src/auth/role.decorator';
 import { User } from 'src/users/entities/user.entity';
 import { AllCategoriesOutput } from './dtos/all-categories.dto';
+import { CategoryInput, CategoryOutput } from './dtos/category.dto';
 import {
   CreateRestaurantInput,
   CreateRestaurantOutput,
@@ -69,12 +70,17 @@ export class CategoryResolver {
   constructor(private readonly restaurantService: RestaurantService) {}
 
   @ResolveField(() => Int) // dynamic field
-  RestaurantCount(@Parent() category: Category) {
+  restaurantCount(@Parent() category: Category) {
     return this.restaurantService.countRestaurants(category);
   }
 
   @Query(() => AllCategoriesOutput)
   allCategories() {
     return this.restaurantService.allCategories();
+  }
+
+  @Query(() => CategoryOutput)
+  category(@Args() categoryInput: CategoryInput) {
+    return this.restaurantService.findCategoryBySlug(categoryInput);
   }
 }
