@@ -28,6 +28,9 @@ export class OrderService {
       if (!restaurant) {
         return { ok: false, error: 'Restaurant not found.' };
       }
+
+      let orderFinalPrice = 0;
+      const orderItems: OrderItem[] = [];
       for (const item of items) {
         const dish = await this.dishes.findOne(item.dishId);
 
@@ -35,8 +38,8 @@ export class OrderService {
           // about this whole thing
           return { ok: false, error: 'Dish not found' };
         }
-        console.log('Dish price: ', dish.price);
 
+        let dishFinalPrice = dish.price;
         for (const itemOption of item.options) {
           const dishOption = dish.options.find(
             (dOption) => dOption.name === itemOption.name,
@@ -44,7 +47,7 @@ export class OrderService {
 
           if (dishOption) {
             if (dishOption.extra) {
-              console.log(`USD + ${dishOption.extra}`);
+              dishFinalPrice += dishOption.extra;
             } else {
               const dishOptionChoice = dishOption.choices.find(
                 (optionChoice) => optionChoice.name === itemOption.choice,
@@ -52,24 +55,31 @@ export class OrderService {
               console.log(dishOptionChoice);
               if (dishOptionChoice) {
                 if (dishOptionChoice.extra) {
-                  console.log(`$USD + ${dishOptionChoice.extra}`);
+                  dishFinalPrice += dishOptionChoice.extra;
                 }
               }
             }
           }
         }
-
-        // await this.orderItems.save(
-        //   this.orderItems.create({ dish, options: item.options }),
-        // );
+        orderFinalPrice += dishFinalPrice;
+        const orderItem = await this.orderItems.save(
+          this.orderItems.create({ dish, options: item.options }),
+        );
+        orderItems.push(orderItem);
       }
 
-      // const order = await this.orders.save(
-      //   this.orders.create({ customer, restaurant }),
-      // );
-      // console.log(order);
+      await this.orders.save(
+        this.orders.create({
+          customer,
+          restaurant,
+          total: orderFinalPrice,
+          items: orderItems,
+        }),
+      );
+
+      return { ok: true };
     } catch (error) {
-      return { ok: false, error: 'Could not order' };
+      return { ok: false, error: 'Could not create order' };
     }
   }
 }
