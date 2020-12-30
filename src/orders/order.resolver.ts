@@ -3,6 +3,7 @@ import { AuthUser } from 'src/auth/auth-user.decorator';
 import { Role } from 'src/auth/role.decorator';
 import { User } from 'src/users/entities/user.entity';
 import { CreateOrderInput, CreateOrderOutput } from './dtos/create-order.dto';
+import { EditOrderInput, EditOrderOutput } from './dtos/edit-order.dto';
 import { GetOrderInput, GetOrderOutput } from './dtos/get-order.dto';
 import { GetOrdersInput, GetOrdersOutput } from './dtos/get-orders.dto';
 import { OrderService } from './order.service';
@@ -36,5 +37,14 @@ export class OrderResolver {
     @Args('input') getOrderInput: GetOrderInput,
   ) {
     return this.orderService.getOrder(user, getOrderInput);
+  }
+
+  @Mutation(() => EditOrderOutput)
+  @Role(['Any'])
+  editOrder(
+    @AuthUser() user: User,
+    @Args('input') editOrderInput: EditOrderInput,
+  ) {
+    return this.orderService.editOrder(user, editOrderInput);
   }
 }
