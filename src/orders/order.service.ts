@@ -5,6 +5,7 @@ import { Restaurant } from 'src/restaurants/entities/restaurants.entity';
 import { User, UserRole } from 'src/users/entities/user.entity';
 import { Repository } from 'typeorm';
 import { CreateOrderInput, CreateOrderOutput } from './dtos/create-order.dto';
+import { GetOrderInput, GetOrderOutput } from './dtos/get-order.dto';
 import { GetOrdersInput, GetOrdersOutput } from './dtos/get-orders.dto';
 import { OrderItem } from './entities/order-item.entity';
 import { Order } from './entities/order.entity';
@@ -91,21 +92,55 @@ export class OrderService {
     try {
       let orders: Order[];
       if (user.role === UserRole.Client) {
-        orders = await this.orders.find({ where: { customer: user } });
+        orders = await this.orders.find({
+          where: { customer: user, ...(status && { status }) },
+        });
       } else if (user.role === UserRole.Delivery) {
-        orders = await this.orders.find({ where: { driver: user } });
+        orders = await this.orders.find({
+          where: { driver: user, ...(status && { status }) },
+        });
       } else if (user.role === UserRole.Owner) {
         const restaurants = await this.restaurants.find({
           where: { owner: user },
           relations: ['orders'],
         });
         orders = restaurants.map((restaurant) => restaurant.orders).flat(1);
-        console.log(orders);
+        if (status) {
+          orders = orders.filter((order) => order.status === status);
+        }
       }
 
       return { ok: true, orders };
     } catch (error) {
       return { ok: false, error: 'Could not get orders' };
+    }
+  }
+
+  async getOrder(
+    user: User,
+    { id: orderId }: GetOrderInput,
+  ): Promise<GetOrderOutput> {
+    try {
+      // restaurant의 id는 필요없으나 owner가 필요하기 때문에 restaurant를 load 해줘야함
+      const order = await this.orders.findOne(orderId, {
+        relations: ['restaurant'],
+      });
+      if (!order) {
+        return { ok: false, error: 'Order not found.' };
+      }
+
+      let canSee = true;
+      if (user.role === UserRole.Client && order.customerId !== user.id)
+        canSee = false;
+      if (user.role === UserRole.Delivery && order.driverId !== user.id)
+        canSee = false;
+      if (user.role === UserRole.Owner && order.restaurant.ownerId !== user.id)
+        canSee = false;
+      if (!canSee) return { ok: false, error: "You can't see that" };
+
+      return { ok: false, order };
+    } catch (error) {
+      return { ok: false, error: 'Could not load order.' };
     }
   }
 }
