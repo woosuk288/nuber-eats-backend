@@ -31,8 +31,15 @@ import { OrderItem } from './orders/entities/order-item.entity';
   imports: [
     GraphQLModule.forRoot({
       // autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
+      installSubscriptionHandlers: true, // enable all websocket stauf on server
       autoSchemaFile: true, // create schema on memory
-      context: ({ req }) => ({ user: req['user'] }),
+      context: ({ req, connection }) => {
+        if (req) {
+          return { user: req['user'] };
+        } else {
+          console.log(connection);
+        }
+      },
     }),
     ConfigModule.forRoot({
       isGlobal: true,
