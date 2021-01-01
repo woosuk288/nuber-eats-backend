@@ -34,7 +34,7 @@ import { OrderItem } from './orders/entities/order-item.entity';
       installSubscriptionHandlers: true, // enable all websocket stauf on server
       autoSchemaFile: true, // create schema on memory
       context: ({ req, connection }) => {
-        const TOEKN_KEY = 'X-JWT';
+        const TOEKN_KEY = 'x-jwt';
         return {
           token: req ? req.headers[TOEKN_KEY] : connection.context[TOEKN_KEY],
         };
