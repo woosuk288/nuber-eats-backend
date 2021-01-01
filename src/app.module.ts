@@ -34,11 +34,10 @@ import { OrderItem } from './orders/entities/order-item.entity';
       installSubscriptionHandlers: true, // enable all websocket stauf on server
       autoSchemaFile: true, // create schema on memory
       context: ({ req, connection }) => {
-        if (req) {
-          return { user: req['user'] };
-        } else {
-          console.log(connection);
-        }
+        const TOEKN_KEY = 'X-JWT';
+        return {
+          token: req ? req.headers[TOEKN_KEY] : connection.context[TOEKN_KEY],
+        };
       },
     }),
     ConfigModule.forRoot({
@@ -66,8 +65,8 @@ import { OrderItem } from './orders/entities/order-item.entity';
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
       synchronize: true,
-      logging:
-        process.env.NODE_ENV !== 'prod' && process.env.NODE_ENV !== 'test',
+      logging: false,
+      // process.env.NODE_ENV !== 'prod' && process.env.NODE_ENV !== 'test',
       entities: [
         User,
         Verification,
@@ -94,11 +93,4 @@ import { OrderItem } from './orders/entities/order-item.entity';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule implements NestModule {
-  configure(consumer: MiddlewareConsumer) {
-    consumer.apply(JwtMiddleware).forRoutes({
-      path: '/graphql',
-      method: RequestMethod.POST,
-    });
-  }
-}
+export class AppModule {}
