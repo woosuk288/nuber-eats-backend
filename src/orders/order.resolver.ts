@@ -3,19 +3,20 @@ import { Args, Mutation, Query, Resolver, Subscription } from '@nestjs/graphql';
 import { PubSub } from 'graphql-subscriptions';
 import { AuthUser } from 'src/auth/auth-user.decorator';
 import { Role } from 'src/auth/role.decorator';
-import { PUB_SUB } from 'src/common/common.constants';
+import { PUB_SUB, NEW_PENDING_ORDER } from 'src/common/common.constants';
 import { User } from 'src/users/entities/user.entity';
 import { CreateOrderInput, CreateOrderOutput } from './dtos/create-order.dto';
 import { EditOrderInput, EditOrderOutput } from './dtos/edit-order.dto';
 import { GetOrderInput, GetOrderOutput } from './dtos/get-order.dto';
 import { GetOrdersInput, GetOrdersOutput } from './dtos/get-orders.dto';
+import { Order } from './entities/order.entity';
 import { OrderService } from './order.service';
 
 @Resolver()
 export class OrderResolver {
   constructor(
     private readonly orderService: OrderService,
-    @Inject(PUB_SUB) private readonly pubsub: PubSub,
+    @Inject(PUB_SUB) private readonly pubSub: PubSub,
   ) {}
 
   @Mutation(() => CreateOrderOutput)
@@ -54,24 +55,14 @@ export class OrderResolver {
     return this.orderService.editOrder(user, editOrderInput);
   }
 
-  @Mutation(() => Boolean)
-  async potatoReady(@Args('potatoId') potatoId: number) {
-    await this.pubsub.publish('hotPotatos', {
-      readyPotato: potatoId,
-    });
-    return true;
-  }
-
-  @Subscription(() => String, {
-    filter: ({ readyPotato }, { potatoId }, context) => {
-      return readyPotato === potatoId;
-    },
-    resolve: ({ readyPotato }) => {
-      return `Your potato with the id ${readyPotato} is ready!`;
+  @Subscription(() => Order, {
+    filter: (payload, _, context) => {
+      console.log(payload);
+      return true;
     },
   })
-  @Role(['Any'])
-  readyPotato(@AuthUser() user: User, @Args('potatoId') potatoId: number) {
-    return this.pubsub.asyncIterator('hotPotatos');
+  @Role(['Owner'])
+  pendingOrders() {
+    return this.pubSub.asyncIterator(NEW_PENDING_ORDER);
   }
 }
