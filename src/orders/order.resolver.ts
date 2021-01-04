@@ -79,9 +79,30 @@ export class OrderResolver {
     return this.pubSub.asyncIterator(NEW_COOKED_ORDER);
   }
 
-  @Subscription(() => Order)
+  @Subscription(() => Order, {
+    filter: (
+      { orderUpdates: order }: { orderUpdates: Order },
+      { input }: { input: OrderUpdatesInput },
+      { user }: { user: User },
+    ) => {
+      // only show orderupdates for people involving this order
+      console.log(order.driverId);
+      console.log(order.customerId);
+      console.log(order.restaurant.ownerId);
+      console.log(user.id);
+      if (
+        order.driverId !== user.id &&
+        order.customerId !== user.id &&
+        order.restaurant.ownerId !== user.id
+      ) {
+        return false;
+      }
+      return order.id === input.id;
+    },
+  })
   @Role(['Any'])
   orderUpdates(@Args('input') orderUpdatesInput: OrderUpdatesInput) {
+    // filter로직을 여기에 넣는게 더 좋을 거임. 누구나 listening하는 걸 막을 수 있음.
     return this.pubSub.asyncIterator(NEW_ORDER_UPDATE);
   }
 }
