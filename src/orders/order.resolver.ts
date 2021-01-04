@@ -15,6 +15,7 @@ import { EditOrderInput, EditOrderOutput } from './dtos/edit-order.dto';
 import { GetOrderInput, GetOrderOutput } from './dtos/get-order.dto';
 import { GetOrdersInput, GetOrdersOutput } from './dtos/get-orders.dto';
 import { OrderUpdatesInput } from './dtos/order-updates.dto';
+import { TakeOrderInput, TakeOrderOutput } from './dtos/take-order.dto';
 import { Order } from './entities/order.entity';
 import { OrderService } from './order.service';
 
@@ -86,10 +87,6 @@ export class OrderResolver {
       { user }: { user: User },
     ) => {
       // only show orderupdates for people involving this order
-      console.log(order.driverId);
-      console.log(order.customerId);
-      console.log(order.restaurant.ownerId);
-      console.log(user.id);
       if (
         order.driverId !== user.id &&
         order.customerId !== user.id &&
@@ -104,5 +101,14 @@ export class OrderResolver {
   orderUpdates(@Args('input') orderUpdatesInput: OrderUpdatesInput) {
     // filter로직을 여기에 넣는게 더 좋을 거임. 누구나 listening하는 걸 막을 수 있음.
     return this.pubSub.asyncIterator(NEW_ORDER_UPDATE);
+  }
+
+  @Mutation(() => TakeOrderOutput)
+  @Role(['Delivery'])
+  takeOrder(
+    @AuthUser() driver: User,
+    @Args('input') takeOrderinput: TakeOrderInput,
+  ) {
+    return this.orderService.takeOrder(driver, takeOrderinput);
   }
 }
