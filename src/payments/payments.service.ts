@@ -39,6 +39,12 @@ export class PaymentService {
           restaurant,
         }),
       );
+      restaurant.isPromoted = true;
+      const date = new Date();
+      date.setDate(date.getDate() + 7);
+      restaurant.promotedUntil = date;
+      this.restaurants.save(restaurant);
+
       return { ok: true };
     } catch (error) {
       return { ok: false, error: 'Could not create payment.' };
