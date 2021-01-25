@@ -30,7 +30,7 @@ import {
 import { RestaurantInput, RestaurantOutput } from './dtos/restaurant.dto';
 import { RestaurantsInput, RestaurantsOutput } from './dtos/restaurants.dto';
 import {
-  SearchRestaurantInpute,
+  SearchRestaurantInput,
   SearchRestaurantOutput,
 } from './dtos/search-restaurant.dto';
 import { Category } from './entities/category.entity';
@@ -86,11 +86,9 @@ export class RestaurantResolver {
 
   @Query(() => SearchRestaurantOutput)
   searchRestaurant(
-    @Args('input') searchRestaurantInpute: SearchRestaurantInpute,
+    @Args('input') searchRestaurantInput: SearchRestaurantInput,
   ) {
-    return this.restaurantService.searchRestaurantByName(
-      searchRestaurantInpute,
-    );
+    return this.restaurantService.searchRestaurantByName(searchRestaurantInput);
   }
 }
 

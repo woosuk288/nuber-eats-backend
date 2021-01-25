@@ -22,7 +22,7 @@ import { CategoryInput, CategoryOutput } from './dtos/category.dto';
 import { RestaurantsInput, RestaurantsOutput } from './dtos/restaurants.dto';
 import { RestaurantInput, RestaurantOutput } from './dtos/restaurant.dto';
 import {
-  SearchRestaurantInpute as SearchRestaurantInput,
+  SearchRestaurantInput,
   SearchRestaurantOutput,
 } from './dtos/search-restaurant.dto';
 import { CreateDishInput, CreateDishOutput } from './dtos/create-dish.dto';
@@ -172,7 +172,7 @@ export class RestaurantService {
         ok: true,
         restaurants,
         category,
-        totalpages: Math.ceil(totalResults / 25),
+        totalPages: Math.ceil(totalResults / 25),
       };
     } catch (error) {
       return { ok: false, error: 'Could not load category' };
@@ -182,14 +182,14 @@ export class RestaurantService {
   async allRestaurants({ page }: RestaurantsInput): Promise<RestaurantsOutput> {
     try {
       const [restaurants, totalResults] = await this.restaurants.findAndCount({
-        take: 25,
-        skip: (page - 1) * 25,
+        take: 3,
+        skip: (page - 1) * 3,
         order: { isPromoted: 'DESC' },
       });
       return {
         ok: true,
         results: restaurants,
-        totalpages: Math.ceil(totalResults / 25),
+        totalPages: Math.ceil(totalResults / 3),
         totalResults,
       };
     } catch (error) {
@@ -238,7 +238,7 @@ export class RestaurantService {
         ok: true,
         restaurants,
         totalResults,
-        totalpages: Math.ceil(totalResults / 25),
+        totalPages: Math.ceil(totalResults / 25),
       };
     } catch (error) {
       return { ok: false, error: 'Could not search for restaurants' };
