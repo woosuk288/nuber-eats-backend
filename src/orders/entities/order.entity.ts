@@ -29,8 +29,8 @@ export enum OrderStatus {
 
 registerEnumType(OrderStatus, { name: 'OrderStatus' });
 
-@InputType()
-@ObjectType('OrderInputType')
+@InputType('OrderInputType')
+@ObjectType()
 @Entity()
 export class Order extends CoreEntity {
   @Field({ nullable: true })
