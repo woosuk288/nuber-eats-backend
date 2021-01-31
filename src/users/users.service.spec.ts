@@ -3,7 +3,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { JwtService } from 'src/jwt/jwt.service';
 import { MailService } from 'src/mail/mail.service';
 import { Repository } from 'typeorm';
-import { User } from './entities/user.entity';
+import { User, UserRole } from './entities/user.entity';
 import { Verification } from './entities/verification.entity';
 import { UserService } from './users.service';
 
@@ -70,7 +70,7 @@ describe('UserService', () => {
     const createAccountArgs = {
       email: '',
       password: '',
-      role: 0,
+      role: UserRole.Owner,
     };
     it('should fail if user exist', async () => {
       usersRepository.findOne.mockResolvedValue({
@@ -250,7 +250,7 @@ describe('UserService', () => {
     it('should fail on exception', async () => {
       usersRepository.findOne.mockRejectedValue(new Error());
       const result = await service.editProfile(1, { email: '123' });
-      expect(result).toEqual({ ok: true, error: 'Could not update profile.' });
+      expect(result).toEqual({ ok: false, error: 'Could not update profile.' });
     });
   });
 
