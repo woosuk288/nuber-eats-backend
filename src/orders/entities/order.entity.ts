@@ -6,7 +6,6 @@ import {
 } from '@nestjs/graphql';
 import { IsEnum, IsNumber } from 'class-validator';
 import { CoreEntity } from 'src/common/entities/core.entity';
-import { Dish } from 'src/restaurants/entities/dish.entity';
 import { Restaurant } from 'src/restaurants/entities/restaurants.entity';
 import { User } from 'src/users/entities/user.entity';
 import {
@@ -21,10 +20,10 @@ import { OrderItem } from './order-item.entity';
 
 export enum OrderStatus {
   Pending = 'Pending',
-  Cooking = '  Cooking',
-  Cooked = '  Cooked',
-  PickedUp = '  PickedUp',
-  Delivered = '  Delivered',
+  Cooking = 'Cooking',
+  Cooked = 'Cooked',
+  PickedUp = 'PickedUp',
+  Delivered = 'Delivered',
 }
 
 registerEnumType(OrderStatus, { name: 'OrderStatus' });

@@ -52,22 +52,24 @@ export class OrderService {
         }
 
         let dishFinalPrice = dish.price;
-        for (const itemOption of item.options) {
-          const dishOption = dish.options.find(
-            (dOption) => dOption.name === itemOption.name,
-          );
+        if (item.options) {
+          for (const itemOption of item.options) {
+            const dishOption = dish.options?.find(
+              (dOption) => dOption.name === itemOption.name,
+            );
 
-          if (dishOption) {
-            if (dishOption.extra) {
-              dishFinalPrice += dishOption.extra;
-            } else {
-              const dishOptionChoice = dishOption.choices.find(
-                (optionChoice) => optionChoice.name === itemOption.choice,
-              );
-              console.log(dishOptionChoice);
-              if (dishOptionChoice) {
-                if (dishOptionChoice.extra) {
-                  dishFinalPrice += dishOptionChoice.extra;
+            if (dishOption) {
+              if (dishOption.extra) {
+                dishFinalPrice += dishOption.extra;
+              } else {
+                const dishOptionChoice = dishOption.choices?.find(
+                  (optionChoice) => optionChoice.name === itemOption.choice,
+                );
+                console.log(dishOptionChoice);
+                if (dishOptionChoice) {
+                  if (dishOptionChoice.extra) {
+                    dishFinalPrice += dishOptionChoice.extra;
+                  }
                 }
               }
             }
@@ -93,8 +95,9 @@ export class OrderService {
         pendingOrders: { order, ownerId: restaurant.ownerId },
       });
 
-      return { ok: true };
+      return { ok: true, orderId: order.id };
     } catch (error) {
+      console.error(error);
       return { ok: false, error: 'Could not create order' };
     }
   }
@@ -160,7 +163,7 @@ export class OrderService {
       if (!this.canSeeOrder(user, order))
         return { ok: false, error: "You can't see that" };
 
-      return { ok: false, order };
+      return { ok: true, order };
     } catch (error) {
       return { ok: false, error: 'Could not load order.' };
     }
