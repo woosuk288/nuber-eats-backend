@@ -31,6 +31,7 @@ import { UploadsModule } from './uploads/uploads.module';
       // autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
       installSubscriptionHandlers: true, // enable all websocket stauf on server
       autoSchemaFile: true, // create schema on memory
+      playground: process.env.NODE_ENV !== 'production',
       context: ({ req, connection }) => {
         const TOEKN_KEY = 'x-jwt';
         return {
