@@ -64,7 +64,6 @@ import { UploadsModule } from './uploads/uploads.module';
       database: process.env.DB_DATABASE,
       synchronize: true,
       logging: false,
-      ssl: true,
       // process.env.NODE_ENV !== 'prod' && process.env.NODE_ENV !== 'test',
       entities: [
         User,
