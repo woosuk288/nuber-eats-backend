@@ -11,7 +11,7 @@ export class Category extends CoreEntity {
   @Field()
   @Column({ unique: true })
   @IsString()
-  @Length(5, 15)
+  @Length(1, 15)
   name: string;
 
   @Field(() => String, { nullable: true })

@@ -14,7 +14,7 @@ export class Restaurant extends CoreEntity {
   @Field()
   @Column()
   @IsString()
-  @Length(5, 50)
+  @Length(1, 50)
   name: string;
 
   @Field(() => String)
